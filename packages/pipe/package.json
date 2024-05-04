@@ -1,0 +1,12 @@
+{
+  "name": "pipe",
+  "version": "0.0.1",
+  "description": "Pipe Library",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "npm run pipe:test"
+  },
+  "author": "Henry Allen",
+  "license": "MIT"
+}
