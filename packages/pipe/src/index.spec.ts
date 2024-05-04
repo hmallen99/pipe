@@ -40,6 +40,10 @@ describe('Pipe', () => {
         button.click();
 
         expect(button.textContent).toEqual('1');
+
+        button.click();
+
+        expect(button.textContent).toEqual('2');
         unmount();
     });
 });
