@@ -1,5 +1,5 @@
-describe("Pipe", () => {
-  it("should load the pipe library", () => {
-    //
-  });
+describe('Pipe', () => {
+    it('should load the pipe library', () => {
+        //
+    });
 });

@@ -11,7 +11,9 @@
   "author": "Henry Allen",
   "license": "MIT",
   "dependencies": {
-    "@reactivex/rxjs": "^6.6.7"
+    "@reactivex/rxjs": "^6.6.7",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0"
   },
   "devDependencies": {
     "@swc/cli": "^0.3.12",
