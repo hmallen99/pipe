@@ -22,9 +22,12 @@
   },
   "homepage": "https://github.com/hmallen99/pipe#readme",
   "devDependencies": {
+    "@babel/preset-env": "^7.24.5",
+    "@babel/preset-typescript": "^7.24.1",
     "@eslint/js": "^9.2.0",
     "@swc/cli": "^0.3.12",
     "@swc/core": "^1.4.17",
+    "@swc/jest": "^0.2.36",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^7.8.0",
     "@typescript-eslint/parser": "^7.8.0",
