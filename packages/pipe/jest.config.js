@@ -175,10 +175,7 @@ const config = {
 
     // A map from regular expressions to paths to transformers
     transform: {
-        '^.+\\.(t|j)sx?$': [
-            '@swc/jest',
-            { ...config /* custom configuration in Jest */ },
-        ],
+        '^.+\\.(t|j)sx?$': ['@swc/jest'],
     },
 
     // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
