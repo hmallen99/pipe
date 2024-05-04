@@ -4,7 +4,8 @@
   "description": "Pipe Library",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "npx swc ./src -d ../../build/pipe --ignore **/*.spec.ts"
   },
   "author": "Henry Allen",
   "license": "MIT",
@@ -12,6 +13,8 @@
     "@reactivex/rxjs": "^6.6.7"
   },
   "devDependencies": {
+    "@swc/cli": "^0.3.12",
+    "@swc/core": "^1.4.17",
     "@types/jest": "^29.5.12",
     "jest": "^29.7.0"
   }
