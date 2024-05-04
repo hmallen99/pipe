@@ -1,0 +1,24 @@
+{
+  "name": "pipe",
+  "version": "0.0.1",
+  "description": "JavaScript UI Library",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hmallen99/pipe.git"
+  },
+  "keywords": [
+    "UI",
+    "JavaScript",
+    "RxJS"
+  ],
+  "author": "Henry Allen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hmallen99/pipe/issues"
+  },
+  "homepage": "https://github.com/hmallen99/pipe#readme"
+}
