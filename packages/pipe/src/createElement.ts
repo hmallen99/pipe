@@ -17,45 +17,60 @@ export function createElement<
     props: Props,
     children?: PipeNode[]
 ): PipeNode {
-    const outCleanup$ = new Subject<void>();
-
-    let outElement: HTMLElement;
-
-    if (typeof component === 'string') {
-        outElement = document.createElement(component);
-        for (const [key, obs$] of Object.entries(props)) {
-            obs$.pipe(takeUntil(outCleanup$)).subscribe((value) => {
-                outElement[key] = value;
-            });
-        }
-    } else {
-        const { element, cleanup$ } = component(props, outCleanup$);
-        outElement = element;
-        outCleanup$.subscribe({
-            complete: () => {
-                cleanup$.next();
-                cleanup$.complete();
-            },
-        });
-    }
+    const cleanup$ = new Subject<void>();
+    const element =
+        typeof component === 'string'
+            ? initializeDomElement(component, props, cleanup$)
+            : initializePipeElement(component, props, cleanup$);
 
     if (children) {
-        for (const { element: child, cleanup$: childCleanup$ } of children) {
-            outElement.appendChild(child);
-            outCleanup$.subscribe({
-                complete: () => {
-                    childCleanup$.next();
-                    childCleanup$.complete();
-                },
-            });
+        for (const { element: child } of children) {
+            element.appendChild(child);
         }
     }
 
-    outCleanup$.subscribe({
+    cleanup$.subscribe({
         complete: () => {
-            outElement.remove();
+            element.remove();
+            if (children) {
+                for (const { cleanup$: childCleanup$ } of children) {
+                    childCleanup$.next();
+                    childCleanup$.complete();
+                }
+            }
         },
     });
 
-    return { element: outElement, cleanup$: outCleanup$ };
+    return { element, cleanup$ };
+}
+
+function initializeDomElement<
+    Props extends Record<string, Observable<unknown>>,
+>(component: string, props: Props, cleanup$: Observable<void>): HTMLElement {
+    const element = document.createElement(component);
+    for (const [key, obs$] of Object.entries(props)) {
+        obs$.pipe(takeUntil(cleanup$)).subscribe((value) => {
+            element[key] = value;
+        });
+    }
+
+    return element;
+}
+
+function initializePipeElement<
+    Props extends Record<string, Observable<unknown>>,
+>(
+    component: Component<Props>,
+    props: Props,
+    cleanup$: Observable<void>
+): HTMLElement {
+    const { element, cleanup$: childCleanup$ } = component(props, cleanup$);
+    cleanup$.subscribe({
+        complete: () => {
+            childCleanup$.next();
+            childCleanup$.complete();
+        },
+    });
+
+    return element;
 }
