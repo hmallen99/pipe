@@ -1,20 +1,20 @@
-import { Component, createElement } from './createElement';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
+import { PipeNode } from './createElement';
 
-export const createRoot = (
-    container: HTMLElement,
-    component: Component<{ render$: Observable<void> }>
-) => {
-    const render$ = new Subject<void>();
-    const element = createElement(component, { render$ });
-    container.appendChild(element);
+export const createRoot = (container: HTMLElement) => {
+    let prevCleanup$: Subject<void> | null = null;
 
     return {
-        render: () => {
-            render$.next();
+        render: (node: PipeNode) => {
+            prevCleanup$?.next();
+            prevCleanup$?.complete();
+            const { element, cleanup$ } = node;
+            prevCleanup$ = cleanup$;
+            container.appendChild(element);
         },
         unmount: () => {
-            render$.complete();
+            prevCleanup$.next();
+            prevCleanup$.complete();
         },
     };
 };
