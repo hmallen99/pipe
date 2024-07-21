@@ -3,7 +3,6 @@ import {
     Observable,
     Subject,
     distinctUntilChanged,
-    switchMap,
     takeUntil,
     tap,
     withLatestFrom,
@@ -19,16 +18,12 @@ export const Ternary = (
     const initialNode = truthyNode();
     const node$ = new BehaviorSubject(initialNode);
 
-    node$.pipe(
-        switchMap((node) => {
-            return cleanup$.pipe(
-                tap(() => {
-                    node.cleanup$.next();
-                    node.cleanup$.complete();
-                })
-            );
-        })
-    );
+    const outNode = {
+        cleanup$,
+        element: initialNode.element,
+    };
+
+    cleanup$.subscribe(initialNode.cleanup$);
 
     bool$
         .pipe(
@@ -37,9 +32,12 @@ export const Ternary = (
             withLatestFrom(node$),
             tap(([bool, node]) => {
                 const parent = node.element.parentNode;
-                const nextNode = bool ? truthyNode() : falsyNode();
-
                 node.cleanup$.next();
+                node.cleanup$.complete();
+
+                const nextNode = bool ? truthyNode() : falsyNode();
+                cleanup$.subscribe(nextNode.cleanup$);
+                outNode.element = nextNode.element;
                 parent.appendChild(nextNode.element);
 
                 node$.next(nextNode);
@@ -47,5 +45,5 @@ export const Ternary = (
         )
         .subscribe();
 
-    return { cleanup$, element: initialNode.element };
+    return outNode;
 };

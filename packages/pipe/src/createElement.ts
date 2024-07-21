@@ -23,23 +23,18 @@ export function createElement<
             ? initializeDomElement(component, props, cleanup$)
             : initializePipeElement(component, props, cleanup$);
 
-    if (children) {
-        for (const { element: child } of children) {
-            element.appendChild(child);
-        }
-    }
-
     cleanup$.subscribe({
         complete: () => {
             element.remove();
-            if (children) {
-                for (const { cleanup$: childCleanup$ } of children) {
-                    childCleanup$.next();
-                    childCleanup$.complete();
-                }
-            }
         },
     });
+
+    if (children) {
+        for (const { element: child, cleanup$: childCleanup$ } of children) {
+            element.appendChild(child);
+            cleanup$.subscribe(childCleanup$);
+        }
+    }
 
     return { element, cleanup$ };
 }
