@@ -4,7 +4,9 @@
     "description": "JavaScript UI Library",
     "main": "index.js",
     "scripts": {
-        "test": "jest"
+        "test": "jest",
+        "lint": "eslint",
+        "style": "prettier -c ."
     },
     "repository": {
         "type": "git",
