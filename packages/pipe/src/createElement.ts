@@ -25,7 +25,6 @@ export function createElement<
 
     cleanup$.subscribe({
         complete: () => {
-            console.log(element.textContent);
             element.remove();
         },
     });
