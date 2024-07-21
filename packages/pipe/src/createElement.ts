@@ -101,12 +101,7 @@ function initializePipeElement<
     cleanup$: Observable<void>
 ): HTMLElement {
     const { element, cleanup$: childCleanup$ } = component(props, cleanup$);
-    cleanup$.subscribe({
-        complete: () => {
-            childCleanup$.next();
-            childCleanup$.complete();
-        },
-    });
+    cleanup$.subscribe(childCleanup$);
 
     return element;
 }
