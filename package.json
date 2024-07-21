@@ -6,7 +6,7 @@
     "scripts": {
         "test": "npx jest",
         "lint": "npx eslint packages",
-        "style": "npx prettier -c ."
+        "style": "npx prettier -c packages"
     },
     "repository": {
         "type": "git",
