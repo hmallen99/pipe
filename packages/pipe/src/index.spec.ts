@@ -224,9 +224,11 @@ describe('Pipe', () => {
                 addChild$.pipe(
                     map(([key, value]) => [
                         key,
-                        createElement('p', {
-                            textContent: new BehaviorSubject(value),
-                        }),
+                        value
+                            ? createElement('p', {
+                                  textContent: new BehaviorSubject(value),
+                              })
+                            : null,
                     ]),
                 ),
             );
