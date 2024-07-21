@@ -1,1 +1,3 @@
-export const t = 5;
+export * from './createElement';
+export * from './createRoot';
+export * from './components';
