@@ -183,34 +183,33 @@ describe('Pipe', () => {
         const div = container.firstChild as HTMLDivElement;
         expect(div).toBeInstanceOf(HTMLDivElement);
 
-        expect(div.childNodes.length).toEqual(0);
+        expect(div.textContent).toEqual('');
 
         addChild$.next(['a', 'foo']);
 
-        expect(div.childNodes.length).toEqual(1);
+        expect(div.textContent).toEqual('foo');
         const childA = div.firstChild as HTMLParagraphElement;
         expect(childA.textContent).toEqual('foo');
 
         addChild$.next(['b', 'bar']);
 
-        expect(div.childNodes.length).toEqual(2);
+        expect(div.textContent).toEqual('foobar');
         const childB = childA.nextSibling as HTMLParagraphElement;
         expect(childB.textContent).toEqual('bar');
 
         addChild$.next(['a', 'baz']);
 
-        expect(div.childNodes.length).toEqual(2);
+        expect(div.textContent).toEqual('bazbar');
         const childAVersion2 = div.firstChild as HTMLParagraphElement;
         expect(childAVersion2.textContent).toEqual('baz');
 
         expect(childAVersion2.nextSibling).toEqual(childB);
 
         addChild$.next(['b', null]);
-        expect(div.childNodes.length).toEqual(1);
-        expect(childAVersion2.nextSibling).toBeFalsy();
+        expect(div.textContent).toEqual('baz');
 
         addChild$.next(['a', null]);
-        expect(div.childNodes.length).toEqual(0);
+        expect(div.textContent).toEqual('');
 
         unmount();
 

@@ -25,6 +25,7 @@ export function createElement<
 
     cleanup$.subscribe({
         complete: () => {
+            console.log(element.textContent);
             element.remove();
         },
     });
@@ -52,19 +53,24 @@ const mergeChildNodes = (
     source.pipe(takeUntil(parentNode.cleanup$)).subscribe({
         next: ([key, nextNode]) => {
             const existingNode = nodes.get(key);
+            const nextSibling = existingNode?.element.nextSibling;
+            existingNode?.cleanup$.next();
+            existingNode?.cleanup$.complete();
 
-            if (existingNode) {
-                existingNode.cleanup$.next();
-                existingNode.cleanup$.complete();
-            }
-
-            if (nextNode) {
-                parentNode.cleanup$.subscribe(nextNode.cleanup$);
-                parentNode.element.appendChild(nextNode.element);
-                nodes.set(key, nextNode);
-            } else {
+            if (!nextNode) {
                 nodes.delete(key);
+                return;
             }
+            nodes.set(key, nextNode);
+            parentNode.cleanup$.subscribe(nextNode.cleanup$);
+
+            if (nextSibling) {
+                parentNode.element.insertBefore(nextNode.element, nextSibling);
+                return;
+            }
+
+            parentNode.element.appendChild(nextNode.element);
+            return;
         },
         complete: () => {
             for (const node of nodes.values()) {
