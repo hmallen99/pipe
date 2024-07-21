@@ -33,7 +33,7 @@ jobs:
               run: npm run style
 
             - name: Run Tests
-              run: npm test
+              run: npm test -- --coverage --coverageReporters lcov
 
             - name: Install lcov
               run: sudo apt-get -y install lcov
@@ -41,7 +41,7 @@ jobs:
             - name: Check code coverage
               uses: zgosalvez/github-actions-report-lcov@v3
               with:
-                  coverage-files: coverage/**/**/lcov.info
+                  coverage-files: coverage/lcov.info
                   minimum-coverage: 85
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   update-comment: true
