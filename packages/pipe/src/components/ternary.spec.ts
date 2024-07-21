@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable, Subject, count, map } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, map } from 'rxjs';
 import { Component, createElement } from '../createElement';
 import { Ternary } from './ternary';
 import { createRoot } from '../createRoot';
