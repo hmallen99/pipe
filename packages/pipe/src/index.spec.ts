@@ -1,14 +1,6 @@
 import { Component, createElement } from './createElement';
 import { createRoot } from './createRoot';
-import {
-    Observable,
-    Subject,
-    BehaviorSubject,
-    scan,
-    map,
-    tap,
-    distinctUntilChanged,
-} from 'rxjs';
+import { Observable, Subject, BehaviorSubject, scan, map, tap, distinctUntilChanged } from 'rxjs';
 
 describe('Pipe', () => {
     it('should render an HTML element in a component', () => {
@@ -19,7 +11,7 @@ describe('Pipe', () => {
             });
             const textContent = click$.pipe(
                 scan((x) => x + 1, 0),
-                map((x) => String(x))
+                map((x) => String(x)),
             );
 
             return createElement('button', {
@@ -56,7 +48,7 @@ describe('Pipe', () => {
             });
             const textContent = click$.pipe(
                 scan((x) => x + 1, 0),
-                map((x) => String(x))
+                map((x) => String(x)),
             );
 
             return createElement('button', {
@@ -65,9 +57,7 @@ describe('Pipe', () => {
             });
         };
 
-        const CounterWrapper: Component<
-            Record<string, Observable<void>>
-        > = () => {
+        const CounterWrapper: Component<Record<string, Observable<void>>> = () => {
             return createElement(Counter, {});
         };
         const container = document.createElement('div');
@@ -98,7 +88,7 @@ describe('Pipe', () => {
         }> = ({ count$ }) => {
             const textContent = count$.pipe(
                 map((x) => String(x)),
-                tap((value) => spy(value))
+                tap((value) => spy(value)),
             );
 
             return createElement('p', {
@@ -123,7 +113,7 @@ describe('Pipe', () => {
         render(
             createElement(TextWrapper, {
                 count$,
-            })
+            }),
         );
 
         const div = container.firstChild as HTMLDivElement;
@@ -172,8 +162,8 @@ describe('Pipe', () => {
                         createElement('p', {
                             textContent: new BehaviorSubject(value),
                         }),
-                    ])
-                )
+                    ]),
+                ),
             );
         };
         const container = document.createElement('div');
@@ -185,7 +175,7 @@ describe('Pipe', () => {
         render(
             createElement(TextWrapper, {
                 addChild$,
-            })
+            }),
         );
 
         const div = container.firstChild as HTMLDivElement;
@@ -231,7 +221,7 @@ describe('Pipe', () => {
         }> = ({ count$ }) => {
             const textContent = count$.pipe(
                 map((x) => String(x)),
-                tap((value) => spy(value))
+                tap((value) => spy(value)),
             );
 
             return createElement('p', {
@@ -253,7 +243,7 @@ describe('Pipe', () => {
         render(
             createElement(TextWrapper, {
                 count$,
-            })
+            }),
         );
 
         const textElement = container.firstChild as HTMLParagraphElement;
@@ -295,19 +285,17 @@ describe('Boolean Operator', () => {
                     'default',
                     value
                         ? createElement('p', {
-                            textContent: new BehaviorSubject('true'),
-                        })
+                              textContent: new BehaviorSubject('true'),
+                          })
                         : createElement('p', {
-                            textContent: new BehaviorSubject('false'),
-                        }),
-                ])
-            )
+                              textContent: new BehaviorSubject('false'),
+                          }),
+                ]),
+            ),
         );
     };
 
-    const CountListenerComponent: Component<{ count$: Observable<number> }> = ({
-        count$,
-    }) => {
+    const CountListenerComponent: Component<{ count$: Observable<number> }> = ({ count$ }) => {
         return createElement('p', {
             textContent: count$,
         });
@@ -327,10 +315,10 @@ describe('Boolean Operator', () => {
                     value
                         ? createElement(CountListenerComponent, { count$ })
                         : createElement(CountListenerComponent, {
-                            count$: count$.pipe(map((count) => count * 2)),
-                        }),
-                ])
-            )
+                              count$: count$.pipe(map((count) => count * 2)),
+                          }),
+                ]),
+            ),
         );
     };
 

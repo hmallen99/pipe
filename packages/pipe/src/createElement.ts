@@ -2,7 +2,7 @@ import { Observable, Subject, takeUntil } from 'rxjs';
 
 export type Component<Props extends Record<string, Observable<unknown>>> = (
     props: Props,
-    cleanup$: Observable<void>
+    cleanup$: Observable<void>,
 ) => PipeNode;
 
 export type PipeNode<T extends HTMLElement = HTMLElement> = {
@@ -10,12 +10,10 @@ export type PipeNode<T extends HTMLElement = HTMLElement> = {
     cleanup$: Subject<void>;
 };
 
-export function createElement<
-    Props extends Record<string, Observable<unknown>>,
->(
+export function createElement<Props extends Record<string, Observable<unknown>>>(
     component: Component<Props> | string,
     props: Props,
-    children?: PipeNode[] | Observable<[string, PipeNode | null]>
+    children?: PipeNode[] | Observable<[string, PipeNode | null]>,
 ): PipeNode {
     const cleanup$ = new Subject<void>();
     const element =
@@ -43,10 +41,7 @@ export function createElement<
     return node;
 }
 
-const mergeChildNodes = (
-    source: Observable<[string, PipeNode | null]>,
-    parentNode: PipeNode
-) => {
+const mergeChildNodes = (source: Observable<[string, PipeNode | null]>, parentNode: PipeNode) => {
     const nodes = new Map<string, PipeNode>();
 
     source.pipe(takeUntil(parentNode.cleanup$)).subscribe({
@@ -80,9 +75,11 @@ const mergeChildNodes = (
     });
 };
 
-function initializeDomElement<
-    Props extends Record<string, Observable<unknown>>,
->(component: string, props: Props, cleanup$: Observable<void>): HTMLElement {
+function initializeDomElement<Props extends Record<string, Observable<unknown>>>(
+    component: string,
+    props: Props,
+    cleanup$: Observable<void>,
+): HTMLElement {
     const element = document.createElement(component);
     for (const [key, obs$] of Object.entries(props)) {
         obs$.pipe(takeUntil(cleanup$)).subscribe((value) => {
@@ -93,12 +90,10 @@ function initializeDomElement<
     return element;
 }
 
-function initializePipeElement<
-    Props extends Record<string, Observable<unknown>>,
->(
+function initializePipeElement<Props extends Record<string, Observable<unknown>>>(
     component: Component<Props>,
     props: Props,
-    cleanup$: Observable<void>
+    cleanup$: Observable<void>,
 ): HTMLElement {
     const { element, cleanup$: childCleanup$ } = component(props, cleanup$);
     cleanup$.subscribe(childCleanup$);
