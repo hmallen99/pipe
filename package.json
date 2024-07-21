@@ -4,9 +4,9 @@
     "description": "JavaScript UI Library",
     "main": "index.js",
     "scripts": {
-        "test": "jest",
-        "lint": "eslint",
-        "style": "prettier -c ."
+        "test": "npx jest",
+        "lint": "npx eslint",
+        "style": "npx prettier -c ."
     },
     "repository": {
         "type": "git",
