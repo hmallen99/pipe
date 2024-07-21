@@ -15,7 +15,7 @@ export function createElement<
 >(
     component: Component<Props> | string,
     props: Props,
-    children?: PipeNode[]
+    children?: PipeNode[] | Observable<[string, PipeNode | null]>
 ): PipeNode {
     const cleanup$ = new Subject<void>();
     const element =
@@ -29,15 +29,51 @@ export function createElement<
         },
     });
 
-    if (children) {
+    const node = { element, cleanup$ };
+
+    if (Array.isArray(children)) {
         for (const { element: child, cleanup$: childCleanup$ } of children) {
             element.appendChild(child);
             cleanup$.subscribe(childCleanup$);
         }
+    } else if (children) {
+        mergeChildNodes(children, node);
     }
 
-    return { element, cleanup$ };
+    return node;
 }
+
+const mergeChildNodes = (
+    source: Observable<[string, PipeNode | null]>,
+    parentNode: PipeNode
+) => {
+    const nodes = new Map<string, PipeNode>();
+
+    source.pipe(takeUntil(parentNode.cleanup$)).subscribe({
+        next: ([key, nextNode]) => {
+            const existingNode = nodes.get(key);
+
+            if (existingNode) {
+                existingNode.cleanup$.next();
+                existingNode.cleanup$.complete();
+            }
+
+            if (nextNode) {
+                parentNode.cleanup$.subscribe(nextNode.cleanup$);
+                parentNode.element.appendChild(nextNode.element);
+                nodes.set(key, nextNode);
+            } else {
+                nodes.delete(key);
+            }
+        },
+        complete: () => {
+            for (const node of nodes.values()) {
+                node.cleanup$.next();
+                node.cleanup$.complete();
+            }
+        },
+    });
+};
 
 function initializeDomElement<
     Props extends Record<string, Observable<unknown>>,
