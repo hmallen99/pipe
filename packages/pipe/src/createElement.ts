@@ -2,7 +2,7 @@ import { Observable, Subject, takeUntil } from 'rxjs';
 
 export type Component<Props extends Record<string, Observable<unknown>>> = (
     props: Props,
-    cleanup$: Observable<void>
+    cleanup$: Observable<void>,
 ) => PipeNode;
 
 export type PipeNode<T extends HTMLElement = HTMLElement> = {
@@ -10,12 +10,10 @@ export type PipeNode<T extends HTMLElement = HTMLElement> = {
     cleanup$: Subject<void>;
 };
 
-export function createElement<
-    Props extends Record<string, Observable<unknown>>,
->(
+export function createElement<Props extends Record<string, Observable<unknown>>>(
     component: Component<Props> | string,
     props: Props,
-    children?: PipeNode[]
+    children?: PipeNode[] | Observable<[string, PipeNode | null]>,
 ): PipeNode {
     const cleanup$ = new Subject<void>();
     const element =
@@ -29,19 +27,59 @@ export function createElement<
         },
     });
 
-    if (children) {
+    const node = { element, cleanup$ };
+
+    if (Array.isArray(children)) {
         for (const { element: child, cleanup$: childCleanup$ } of children) {
             element.appendChild(child);
             cleanup$.subscribe(childCleanup$);
         }
+    } else if (children) {
+        mergeChildNodes(children, node);
     }
 
-    return { element, cleanup$ };
+    return node;
 }
 
-function initializeDomElement<
-    Props extends Record<string, Observable<unknown>>,
->(component: string, props: Props, cleanup$: Observable<void>): HTMLElement {
+const mergeChildNodes = (source: Observable<[string, PipeNode | null]>, parentNode: PipeNode) => {
+    const nodes = new Map<string, PipeNode>();
+
+    source.pipe(takeUntil(parentNode.cleanup$)).subscribe({
+        next: ([key, nextNode]) => {
+            const existingNode = nodes.get(key);
+            const nextSibling = existingNode?.element.nextSibling;
+            existingNode?.cleanup$.next();
+            existingNode?.cleanup$.complete();
+
+            if (!nextNode) {
+                nodes.delete(key);
+                return;
+            }
+            nodes.set(key, nextNode);
+            parentNode.cleanup$.subscribe(nextNode.cleanup$);
+
+            if (nextSibling) {
+                parentNode.element.insertBefore(nextNode.element, nextSibling);
+                return;
+            }
+
+            parentNode.element.appendChild(nextNode.element);
+            return;
+        },
+        complete: () => {
+            for (const node of nodes.values()) {
+                node.cleanup$.next();
+                node.cleanup$.complete();
+            }
+        },
+    });
+};
+
+function initializeDomElement<Props extends Record<string, Observable<unknown>>>(
+    component: string,
+    props: Props,
+    cleanup$: Observable<void>,
+): HTMLElement {
     const element = document.createElement(component);
     for (const [key, obs$] of Object.entries(props)) {
         obs$.pipe(takeUntil(cleanup$)).subscribe((value) => {
@@ -52,20 +90,13 @@ function initializeDomElement<
     return element;
 }
 
-function initializePipeElement<
-    Props extends Record<string, Observable<unknown>>,
->(
+function initializePipeElement<Props extends Record<string, Observable<unknown>>>(
     component: Component<Props>,
     props: Props,
-    cleanup$: Observable<void>
+    cleanup$: Observable<void>,
 ): HTMLElement {
     const { element, cleanup$: childCleanup$ } = component(props, cleanup$);
-    cleanup$.subscribe({
-        complete: () => {
-            childCleanup$.next();
-            childCleanup$.complete();
-        },
-    });
+    cleanup$.subscribe(childCleanup$);
 
     return element;
 }
