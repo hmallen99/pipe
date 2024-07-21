@@ -295,11 +295,11 @@ describe('Boolean Operator', () => {
                     'default',
                     value
                         ? createElement('p', {
-                            textContent: new BehaviorSubject('true'),
-                        })
+                              textContent: new BehaviorSubject('true'),
+                          })
                         : createElement('p', {
-                            textContent: new BehaviorSubject('false'),
-                        }),
+                              textContent: new BehaviorSubject('false'),
+                          }),
                 ])
             )
         );
@@ -327,8 +327,8 @@ describe('Boolean Operator', () => {
                     value
                         ? createElement(CountListenerComponent, { count$ })
                         : createElement(CountListenerComponent, {
-                            count$: count$.pipe(map((count) => count * 2)),
-                        }),
+                              count$: count$.pipe(map((count) => count * 2)),
+                          }),
                 ])
             )
         );
