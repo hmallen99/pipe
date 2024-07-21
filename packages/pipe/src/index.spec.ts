@@ -214,6 +214,71 @@ describe('Pipe', () => {
         expect(container.firstChild).toBeFalsy();
     });
 
+    it('should pop items from the front of an observable list', () => {
+        const TextWrapper: Component<{
+            addChild$: Observable<[string, string]>;
+        }> = ({ addChild$ }) => {
+            return createElement(
+                'div',
+                {},
+                addChild$.pipe(
+                    map(([key, value]) => [
+                        key,
+                        createElement('p', {
+                            textContent: new BehaviorSubject(value),
+                        }),
+                    ]),
+                ),
+            );
+        };
+        const container = document.createElement('div');
+
+        const { render, unmount } = createRoot(container);
+
+        const addChild$ = new Subject<[string, string]>();
+
+        render(
+            createElement(TextWrapper, {
+                addChild$,
+            }),
+        );
+
+        const div = container.firstChild as HTMLDivElement;
+        expect(div).toBeInstanceOf(HTMLDivElement);
+
+        expect(div.textContent).toEqual('');
+
+        addChild$.next(['a', 'foo']);
+
+        expect(div.textContent).toEqual('foo');
+        const childA = div.firstChild as HTMLParagraphElement;
+        expect(childA.textContent).toEqual('foo');
+
+        addChild$.next(['b', 'bar']);
+
+        expect(div.textContent).toEqual('foobar');
+        const childB = childA.nextSibling as HTMLParagraphElement;
+        expect(childB.textContent).toEqual('bar');
+
+        addChild$.next(['b', 'baz']);
+
+        expect(div.textContent).toEqual('foobaz');
+        const childBVersion2 = div.firstChild.nextSibling as HTMLParagraphElement;
+        expect(childBVersion2.textContent).toEqual('baz');
+
+        expect(childBVersion2.previousSibling).toEqual(childA);
+
+        addChild$.next(['a', null]);
+        expect(div.textContent).toEqual('baz');
+
+        addChild$.next(['b', null]);
+        expect(div.textContent).toEqual('');
+
+        unmount();
+
+        expect(container.firstChild).toBeFalsy();
+    });
+
     it('should clean up observables on unmount', () => {
         const spy = jest.fn();
         const Text: Component<{
