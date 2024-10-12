@@ -107,3 +107,7 @@ import { createElement, createRoot, Subject, of } from '@hmallen99/pipe';
 ```
 
 For a more detailed exploration of usage, view the [example todo app](./apps/todo-app/src/TodoApp.ts).
+
+## Planned work
+
+Track bugs and new features on GitHub: https://github.com/hmallen99/pipe/issues
