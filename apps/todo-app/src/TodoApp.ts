@@ -45,9 +45,13 @@ export const TodoApp: Component<Record<string, Observable<void>>> = () => {
       {
         onsubmit: of((e: Event) => {
           e.preventDefault();
-          const formData = new FormData(e.target as HTMLFormElement);
+          const formElement = e.target as HTMLFormElement;
+          const formData = new FormData(formElement);
           const todoText = formData.get('todo');
           clickAdd$.next(todoText as string);
+          const inputElement =
+            formElement.firstElementChild as HTMLInputElement;
+          inputElement.value = '';
         }),
       },
       [
