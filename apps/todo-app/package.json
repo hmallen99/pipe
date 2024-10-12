@@ -6,7 +6,7 @@
     "build": "rsbuild build",
     "dev": "rsbuild dev --open",
     "format": "prettier --write .",
-    "lint": "eslint .",
+    "lint": "eslint src",
     "preview": "rsbuild preview"
   },
   "devDependencies": {
@@ -19,6 +19,6 @@
     "typescript-eslint": "^8.5.0"
   },
   "dependencies": {
-    "@hmallen99/pipe": "^1.0.1"
+    "@hmallen99/pipe": "^1.0.2"
   }
 }
