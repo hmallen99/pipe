@@ -1,4 +1,4 @@
-import { createElement, createRoot } from '@pipe/pipe';
+import { createElement, createRoot } from '@hmallen99/pipe';
 
 import './index.css';
 import { TodoApp } from './TodoApp';
