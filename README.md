@@ -1,3 +1,3 @@
 # pipe
 
-Another JavaScript UI Library
+A Reactive DOM UI Library built on RxJS and TypeScript.
