@@ -1,4 +1,6 @@
-# Rsbuild Project
+# Example TODO App
+
+A simple todo list application built with pipe.
 
 ## Setup
 
