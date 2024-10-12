@@ -1,12 +1,14 @@
 {
-    "name": "pipe",
+    "name": "@pipe/pipe",
     "version": "0.0.1",
     "description": "Pipe Library",
-    "main": "index.js",
+    "main": "dist/src/index.js",
+    "types": "dist/src/index.d.ts",
     "scripts": {
         "test": "jest",
-        "build": "npx swc ./src -d ../../build/pipe --ignore **/*.spec.ts",
-        "typecheck": "npx tsc --noEmit ./src/*.ts"
+        "build": "npx swc ./src -d ./dist --ignore **/*.spec.ts",
+        "typecheck": "npx tsc --noEmit ./src/*.ts",
+        "generate-types": "npx tsc --emitDeclarationOnly --outDir dist -p tsconfig.json"
     },
     "author": "Henry Allen",
     "license": "MIT",

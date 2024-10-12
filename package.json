@@ -6,8 +6,7 @@
     "scripts": {
         "test": "npx jest",
         "lint": "npx eslint packages",
-        "style": "npx prettier -c packages",
-        "build": "npx tsc -p tsconfig.build.json --outDir build"
+        "style": "npx prettier -c packages"
     },
     "repository": {
         "type": "git",

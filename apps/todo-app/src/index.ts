@@ -1,3 +1,5 @@
+import { createRoot } from '@pipe/pipe';
+
 import './index.css';
 
 document.querySelector('#root')!.innerHTML = `
