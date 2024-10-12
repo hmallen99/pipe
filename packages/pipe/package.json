@@ -12,7 +12,8 @@
         "test": "jest",
         "build": "npx swc ./src -d ./dist --ignore **/*.spec.ts",
         "typecheck": "npx tsc --noEmit ./src/*.ts",
-        "generate-types": "npx tsc --emitDeclarationOnly --outDir dist -p tsconfig.json"
+        "generate-types": "npx tsc --emitDeclarationOnly --outDir dist -p tsconfig.json",
+        "prepare": "npm run build && npm run generate-types"
     },
     "author": "Henry Allen",
     "license": "MIT",
