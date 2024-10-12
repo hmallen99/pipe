@@ -15,5 +15,6 @@
         "no-var": ["error"],
         "workspaces/no-relative-imports": "error",
         "workspaces/require-dependency": "warn"
-    }
+    },
+    "ignorePatterns": ["**/dist/*"]
 }
