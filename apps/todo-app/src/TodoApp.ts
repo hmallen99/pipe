@@ -9,7 +9,7 @@ import {
   PipeNode,
   scan,
   Subject,
-} from '@pipe/pipe';
+} from '@hmallen99/pipe';
 
 export const TodoApp: Component<Record<string, Observable<void>>> = () => {
   const clickAdd$ = new Subject<string>();

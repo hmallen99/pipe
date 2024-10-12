@@ -1,5 +1,5 @@
 {
-    "name": "@pipe/pipe",
+    "name": "@hmallen99/pipe",
     "version": "0.0.1",
     "description": "Pipe Library",
     "main": "dist/src/index.js",
