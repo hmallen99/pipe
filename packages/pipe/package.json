@@ -1,6 +1,6 @@
 {
     "name": "@hmallen99/pipe",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Pipe Library",
     "main": "dist/src/index.js",
     "types": "dist/src/index.d.ts",
@@ -13,7 +13,7 @@
         "build": "npx swc ./src -d ./dist --ignore **/*.spec.ts",
         "typecheck": "npx tsc --noEmit ./src/*.ts",
         "generate-types": "npx tsc --emitDeclarationOnly --outDir dist -p tsconfig.json",
-        "prepare": "npm run build && npm run generate-types"
+        "prepare": "rm -rf ./dist && npm run build && npm run generate-types"
     },
     "author": "Henry Allen",
     "license": "MIT",
