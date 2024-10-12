@@ -38,42 +38,59 @@ export const TodoApp: Component<Record<string, Observable<void>>> = () => {
     map((key) => [key, null]),
   );
 
-  return createElement('div', {}, [
-    createElement('div', {}, merge(addChild$, removeChild$)),
-    createElement(
-      'form',
-      {
-        onsubmit: of((e: Event) => {
-          e.preventDefault();
-          const formElement = e.target as HTMLFormElement;
-          const formData = new FormData(formElement);
-          const todoText = formData.get('todo');
-          clickAdd$.next(todoText as string);
-          const inputElement =
-            formElement.firstElementChild as HTMLInputElement;
-          inputElement.value = '';
-        }),
-      },
-      [
-        createElement('input', {
-          type: of('text'),
-          name: of('todo'),
-        }),
-        createElement('input', {
-          type: of('submit'),
-          value: of('Add TODO'),
-        }),
-      ],
-    ),
-  ]);
+  return createElement(
+    'div',
+    {
+      id: of('content'),
+    },
+    [
+      createElement('h2', { textContent: of('Todo List') }),
+      createElement('div', {}, merge(addChild$, removeChild$)),
+      createElement(
+        'form',
+        {
+          id: of('add-todo-form'),
+          onsubmit: of((e: Event) => {
+            e.preventDefault();
+            const formElement = e.target as HTMLFormElement;
+            const formData = new FormData(formElement);
+            const todoText = formData.get('todo');
+            clickAdd$.next(todoText as string);
+            const inputElement =
+              formElement.firstElementChild as HTMLInputElement;
+            inputElement.value = '';
+          }),
+        },
+        [
+          createElement('input', {
+            type: of('text'),
+            name: of('todo'),
+            placeholder: of('Add Todo'),
+          }),
+        ],
+      ),
+    ],
+  );
 };
 
 export const TodoItem: Component<{
   onRemove: Observable<() => void>;
   text: Observable<string>;
 }> = ({ onRemove, text }) => {
-  return createElement('div', {}, [
-    createElement('button', { textContent: of('X'), onclick: onRemove }),
-    createElement('p', { textContent: text }),
-  ]);
+  return createElement(
+    'div',
+    {
+      id: of('todo-item'),
+    },
+    [
+      createElement('div', { id: of('button-container') }, [
+        createElement('button', {
+          id: of('todo-button'),
+          textContent: of(''),
+          onclick: onRemove,
+        }),
+      ]),
+      createElement('p', { textContent: text }),
+    ],
+  );
 };
