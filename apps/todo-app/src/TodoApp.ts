@@ -8,13 +8,18 @@ import {
   PipeNode,
   scan,
   Subject,
+  takeUntil,
 } from '@hmallen99/pipe';
 
-export const TodoApp: Component<Record<string, Observable<void>>> = () => {
+export const TodoApp: Component<Record<string, Observable<void>>> = (
+  _,
+  cleanup$,
+) => {
   const clickAdd$ = new Subject<string>();
   const clickRemove$ = new Subject<string>();
 
   const addChild$: Observable<[string, PipeNode]> = clickAdd$.pipe(
+    takeUntil(cleanup$),
     scan(({ count }, todoText) => ({ count: count + 1, todoText }), {
       count: 0,
       todoText: '' as string,
@@ -34,6 +39,7 @@ export const TodoApp: Component<Record<string, Observable<void>>> = () => {
   );
 
   const removeChild$: Observable<[string, null]> = clickRemove$.pipe(
+    takeUntil(cleanup$),
     map((key) => [key, null]),
   );
 

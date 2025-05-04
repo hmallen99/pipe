@@ -9,6 +9,8 @@ import {
     tap,
     distinctUntilChanged,
     of,
+    takeUntil,
+    finalize,
 } from 'rxjs';
 
 describe('Pipe', () => {
@@ -675,5 +677,51 @@ describe('Props', () => {
 
         unmount();
         expect(container.firstChild).toBeFalsy();
+    });
+});
+
+describe('Cleanup', () => {
+    it('should allow cleaning up observables', () => {
+        const nextSpy = jest.fn();
+        const finalizeSpy = jest.fn();
+        const HelloComponent: Component<{ textContent: Observable<string> }> = (
+            { textContent },
+            cleanup$,
+        ) => {
+            const text$ = textContent.pipe(
+                takeUntil(cleanup$),
+                tap(nextSpy),
+                finalize(finalizeSpy),
+            );
+
+            return createElement('p', {
+                textContent: text$,
+            });
+        };
+
+        const container = document.createElement('div');
+
+        const { render, unmount } = createRoot(container);
+        const textContent$ = new BehaviorSubject('Hello World!');
+
+        render(createElement(HelloComponent, { textContent: textContent$ }));
+
+        expect(nextSpy).toHaveBeenCalledTimes(1);
+        expect(nextSpy).toHaveBeenCalledWith('Hello World!');
+
+        textContent$.next('Next!');
+
+        expect(nextSpy).toHaveBeenCalledTimes(2);
+        expect(nextSpy).toHaveBeenLastCalledWith('Next!');
+
+        expect(finalizeSpy).not.toHaveBeenCalled();
+
+        unmount();
+
+        expect(finalizeSpy).toHaveBeenCalled();
+
+        textContent$.next('Goodbye!');
+        expect(nextSpy).toHaveBeenCalledTimes(2);
+        expect(nextSpy).toHaveBeenLastCalledWith('Next!');
     });
 });
