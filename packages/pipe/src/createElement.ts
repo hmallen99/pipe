@@ -10,8 +10,19 @@ export type PipeNode<T extends HTMLElement = HTMLElement> = {
     cleanup$: Subject<void>;
 };
 
-export function createElement<Props extends Record<string, Observable<unknown>>>(
-    component: Component<Props> | string,
+type HTMLElementProps<Tag extends keyof HTMLElementTagNameMap> = {
+    [Property in keyof HTMLElementTagNameMap[Tag]]?: Observable<
+        HTMLElementTagNameMap[Tag][Property]
+    >;
+};
+
+export function createElement<
+    C extends Component<Props> | keyof HTMLElementTagNameMap,
+    Props extends C extends keyof HTMLElementTagNameMap
+        ? HTMLElementProps<C>
+        : Record<string, Observable<unknown>>,
+>(
+    component: C,
     props: Props,
     children?: PipeNode[] | Observable<[string, PipeNode | null]>,
 ): PipeNode {
@@ -75,14 +86,19 @@ const mergeChildNodes = (source: Observable<[string, PipeNode | null]>, parentNo
     });
 };
 
-function initializeDomElement<Props extends Record<string, Observable<unknown>>>(
-    component: string,
-    props: Props,
+function initializeDomElement<
+    ElementType extends keyof HTMLElementTagNameMap,
+    Element extends HTMLElementTagNameMap[ElementType],
+>(
+    component: ElementType,
+    props: {
+        [Property in keyof Element]?: Observable<Element[Property]>;
+    },
     cleanup$: Observable<void>,
-): HTMLElement {
-    const element = document.createElement(component);
-    for (const [key, obs$] of Object.entries(props)) {
-        obs$.pipe(takeUntil(cleanup$)).subscribe((value) => {
+): Element {
+    const element = document.createElement(component) as Element;
+    for (const key of Object.keys(props) as (keyof Element)[]) {
+        props[key].pipe(takeUntil(cleanup$)).subscribe((value) => {
             element[key] = value;
         });
     }

@@ -407,7 +407,7 @@ describe('Boolean Operator', () => {
 
     const CountListenerComponent: Component<{ count$: Observable<number> }> = ({ count$ }) => {
         return createElement('p', {
-            textContent: count$,
+            textContent: count$.pipe(map((value) => `${value}`)),
         });
     };
 
