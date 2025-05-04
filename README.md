@@ -46,3 +46,11 @@ Full documentation for each pipe library can be found in the corresponding packa
 ## Examples
 
 -   [Todo App](./apps/todo-app/README.md)
+
+## Contributing
+
+Given how early into development this repo is, we are not currently accepting pull requests. The API is subject to change significantly.
+
+## License
+
+Pipe is [MIT Licensed](./LICENSE)
