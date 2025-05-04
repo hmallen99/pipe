@@ -407,7 +407,7 @@ describe('Boolean Operator', () => {
 
     const CountListenerComponent: Component<{ count$: Observable<number> }> = ({ count$ }) => {
         return createElement('p', {
-            textContent: count$,
+            textContent: count$.pipe(map((value) => `${value}`)),
         });
     };
 
@@ -601,6 +601,79 @@ describe('Boolean Operator', () => {
 
         unmount();
 
+        expect(container.firstChild).toBeFalsy();
+    });
+});
+
+describe('Props', () => {
+    it('should allow passing const props to dom elements', () => {
+        const HelloComponent: Component<Record<string, Observable<void>>> = () => {
+            return createElement('p', {
+                textContent: 'Hello World!',
+            });
+        };
+
+        const container = document.createElement('div');
+
+        const { render, unmount } = createRoot(container);
+
+        render(createElement(HelloComponent, {}));
+
+        const paragraph = container.firstChild as HTMLParagraphElement;
+        expect(paragraph).toBeInstanceOf(HTMLParagraphElement);
+        expect(paragraph.textContent).toEqual('Hello World!');
+
+        unmount();
+        expect(container.firstChild).toBeFalsy();
+    });
+
+    it('should allow passing const props to components', () => {
+        const HelloComponent: Component<{ textContent: string }> = ({ textContent }) => {
+            return createElement('p', {
+                textContent,
+            });
+        };
+
+        const container = document.createElement('div');
+
+        const { render, unmount } = createRoot(container);
+
+        render(createElement(HelloComponent, { textContent: 'Hello World!' }));
+
+        const paragraph = container.firstChild as HTMLParagraphElement;
+        expect(paragraph).toBeInstanceOf(HTMLParagraphElement);
+        expect(paragraph.textContent).toEqual('Hello World!');
+
+        unmount();
+        expect(container.firstChild).toBeFalsy();
+    });
+
+    it('should allow passing observable props', () => {
+        const HelloComponent: Component<{ textContent: Observable<string> }> = ({
+            textContent,
+        }) => {
+            return createElement('p', {
+                textContent,
+            });
+        };
+
+        const container = document.createElement('div');
+
+        const { render, unmount } = createRoot(container);
+
+        const textContent$ = new BehaviorSubject('Hello World!');
+
+        render(createElement(HelloComponent, { textContent: textContent$ }));
+
+        const paragraph = container.firstChild as HTMLParagraphElement;
+        expect(paragraph).toBeInstanceOf(HTMLParagraphElement);
+        expect(paragraph.textContent).toEqual('Hello World!');
+
+        textContent$.next('Goodbye!');
+
+        expect(paragraph.textContent).toEqual('Goodbye!');
+
+        unmount();
         expect(container.firstChild).toBeFalsy();
     });
 });
