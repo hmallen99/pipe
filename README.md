@@ -1,4 +1,4 @@
-# <img src="PipeLogo.png" alt="Pipe Logo">
+# <img src="PipeLogo.png" alt="Pipe Logo" width="300">
 
 Pipe is an observable-driven JavaScript library for creating User Interfaces (UI).
 
