@@ -1,6 +1,6 @@
 import { Observable, Subject, takeUntil } from 'rxjs';
 
-export type Component<Props extends Record<string, Observable<unknown>>> = (
+export type Component<Props extends Record<string, Observable<unknown> | unknown>> = (
     props: Props,
     cleanup$: Observable<void>,
 ) => PipeNode;
@@ -11,16 +11,16 @@ export type PipeNode<T extends HTMLElement = HTMLElement> = {
 };
 
 type HTMLElementProps<Tag extends keyof HTMLElementTagNameMap> = {
-    [Property in keyof HTMLElementTagNameMap[Tag]]?: Observable<
-        HTMLElementTagNameMap[Tag][Property]
-    >;
+    [Property in keyof HTMLElementTagNameMap[Tag]]?:
+        | Observable<HTMLElementTagNameMap[Tag][Property]>
+        | HTMLElementTagNameMap[Tag][Property];
 };
 
 export function createElement<
     C extends Component<Props> | keyof HTMLElementTagNameMap,
     Props extends C extends keyof HTMLElementTagNameMap
         ? HTMLElementProps<C>
-        : Record<string, Observable<unknown>>,
+        : Record<string, Observable<unknown> | unknown>,
 >(
     component: C,
     props: Props,
@@ -92,21 +92,25 @@ function initializeDomElement<
 >(
     component: ElementType,
     props: {
-        [Property in keyof Element]?: Observable<Element[Property]>;
+        [Property in keyof Element]?: Observable<Element[Property]> | Element[Property];
     },
     cleanup$: Observable<void>,
 ): Element {
     const element = document.createElement(component) as Element;
     for (const key of Object.keys(props) as (keyof Element)[]) {
-        props[key].pipe(takeUntil(cleanup$)).subscribe((value) => {
-            element[key] = value;
-        });
+        if (props[key] instanceof Observable) {
+            props[key].pipe(takeUntil(cleanup$)).subscribe((value) => {
+                element[key] = value;
+            });
+        } else {
+            element[key] = props[key] as Element[typeof key];
+        }
     }
 
     return element;
 }
 
-function initializePipeElement<Props extends Record<string, Observable<unknown>>>(
+function initializePipeElement<Props extends Record<string, Observable<unknown> | unknown>>(
     component: Component<Props>,
     props: Props,
     cleanup$: Observable<void>,
