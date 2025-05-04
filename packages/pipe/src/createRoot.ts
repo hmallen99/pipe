@@ -1,20 +1,26 @@
-import { Subject } from 'rxjs';
+import { endWith, pairwise, startWith, Subject } from 'rxjs';
 import { PipeNode } from './createElement';
 
 export const createRoot = (container: HTMLElement) => {
-    let prevCleanup$: Subject<void> | null = null;
+    const node$ = new Subject<PipeNode>();
+
+    node$.pipe(startWith(null), endWith(null), pairwise()).subscribe(([previousNode, nextNode]) => {
+        if (previousNode) {
+            previousNode.cleanup$.next();
+            previousNode.cleanup$.complete();
+        }
+
+        if (nextNode) {
+            container.appendChild(nextNode.element);
+        }
+    });
 
     return {
         render: (node: PipeNode) => {
-            prevCleanup$?.next();
-            prevCleanup$?.complete();
-            const { element, cleanup$ } = node;
-            prevCleanup$ = cleanup$;
-            container.appendChild(element);
+            node$.next(node);
         },
         unmount: () => {
-            prevCleanup$.next();
-            prevCleanup$.complete();
+            node$.complete();
         },
     };
 };
