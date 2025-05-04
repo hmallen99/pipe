@@ -1,6 +1,15 @@
 import { Component, createElement } from './createElement';
 import { createRoot } from './createRoot';
-import { Observable, Subject, BehaviorSubject, scan, map, tap, distinctUntilChanged } from 'rxjs';
+import {
+    Observable,
+    Subject,
+    BehaviorSubject,
+    scan,
+    map,
+    tap,
+    distinctUntilChanged,
+    of,
+} from 'rxjs';
 
 describe('Pipe', () => {
     it('should render an HTML element in a component', () => {
@@ -35,6 +44,40 @@ describe('Pipe', () => {
         button.click();
 
         expect(button.textContent).toEqual('2');
+        unmount();
+
+        expect(container.firstChild).toBeFalsy();
+    });
+
+    it('should render multiple times', () => {
+        const HelloComponent: Component<Record<string, Observable<void>>> = () => {
+            return createElement('p', {
+                textContent: of('Hello World!'),
+            });
+        };
+
+        const GoodbyeComponent: Component<Record<string, Observable<void>>> = () => {
+            return createElement('p', {
+                textContent: of('Goodbye!'),
+            });
+        };
+        const container = document.createElement('div');
+
+        const { render, unmount } = createRoot(container);
+
+        render(createElement(HelloComponent, {}));
+
+        const paragraph = container.firstChild as HTMLParagraphElement;
+        expect(paragraph).toBeInstanceOf(HTMLParagraphElement);
+        expect(paragraph.textContent).toEqual('Hello World!');
+
+        render(createElement(GoodbyeComponent, {}));
+        const paragraph2 = container.firstChild as HTMLParagraphElement;
+        expect(paragraph2).toBeInstanceOf(HTMLParagraphElement);
+        expect(paragraph).not.toEqual(paragraph2);
+        expect(paragraph2.textContent).toEqual('Goodbye!');
+        expect(paragraph2.nextSibling).toBeFalsy();
+
         unmount();
 
         expect(container.firstChild).toBeFalsy();
