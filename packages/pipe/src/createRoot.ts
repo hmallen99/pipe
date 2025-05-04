@@ -1,4 +1,4 @@
-import { endWith, finalize, pairwise, startWith, Subject, switchMap } from 'rxjs';
+import { endWith, pairwise, startWith, Subject } from 'rxjs';
 import { PipeNode } from './createElement';
 
 export const createRoot = (container: HTMLElement) => {
