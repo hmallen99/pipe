@@ -200,6 +200,11 @@ describe('Context', () => {
         const paragraph2 = button.firstChild.nextSibling as HTMLDivElement;
         expect(paragraph2).toBeInstanceOf(HTMLDivElement);
         expect(paragraph2.textContent).toEqual('2');
+
+        button.click();
+        expect(button.textContent).toEqual('3');
+        expect(paragraph2.textContent).toEqual('3');
+
         unmount();
 
         expect(container.firstChild).toBeFalsy();

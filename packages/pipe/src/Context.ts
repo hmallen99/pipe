@@ -7,6 +7,7 @@ import {
     concat,
     concatMap,
     from,
+    take,
 } from 'rxjs';
 
 export type Context = {
@@ -26,6 +27,7 @@ export function initializeContext(cleanup$: Observable<void>) {
                 );
                 return from(latestValues);
             }),
+            take(1),
         ),
         contextValueSubject,
     );
