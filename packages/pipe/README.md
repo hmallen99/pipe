@@ -108,6 +108,44 @@ import { createElement, createRoot, Subject, of } from '@hmallen99/pipe';
 
 For a more detailed exploration of usage, view the [example todo app](./apps/todo-app/src/TodoApp.ts).
 
+Context:
+
+Context can be used to share values across nodes of the tree without passing props. A parent component can set context that can be accessed from any descendant component.
+
+```ts
+const CounterOutput: Component<Record<string, Observable<void>>> = (_props, _cleanup, context) => {
+    return createElement('div', {
+        textContent: context.get('counter'),
+    });
+};
+
+const CounterContext: Component<Record<string, Observable<void>>> = (_props, _cleanup, context) => {
+    const click$ = new Subject<void>();
+    const textContent = click$.pipe(
+        scan((x) => x + 1, 0),
+        map((x) => String(x)),
+        tap((x) => {
+            context.set('counter', x);
+        }),
+    );
+
+    return createElement(
+        'button',
+        {
+            onclick: () => {
+                click$.next();
+            },
+            textContent: 'Update Counter!',
+        },
+        [createElement(TextOutput, {})],
+    );
+};
+
+const App: Component<Record<string, Observable<void>>> = () => {
+    return createElement('div', {}, [createElement(Counter, {})]);
+};
+```
+
 ## Planned work
 
 Track bugs and new features on GitHub: https://github.com/hmallen99/pipe/issues
