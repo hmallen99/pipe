@@ -29,6 +29,52 @@ describe('Context', () => {
         );
     };
 
+    it('should not pass context up', () => {
+        const TextOutput: Component<Record<string, Observable<void>>> = (
+            _props,
+            _cleanup,
+            context,
+        ) => {
+            return createElement('div', {
+                onclick: () => {
+                    context.set('counter', 4);
+                },
+                textContent: context.get('counter'),
+            });
+        };
+        const container = document.createElement('div');
+
+        const { render, unmount } = createRoot(container);
+
+        render(createElement(CounterContext, { children: [createElement(TextOutput, {})] }));
+
+        const button = container.firstChild as HTMLDivElement;
+        expect(button).toBeInstanceOf(HTMLDivElement);
+        const paragraph = button.firstChild as HTMLDivElement;
+        expect(paragraph).toBeInstanceOf(HTMLDivElement);
+
+        button.click();
+
+        expect(button.textContent).toEqual('1');
+        expect(paragraph.textContent).toEqual('1');
+
+        button.click();
+
+        expect(button.textContent).toEqual('2');
+        expect(paragraph.textContent).toEqual('2');
+
+        paragraph.click();
+        expect(button.textContent).toEqual('2');
+        expect(paragraph.textContent).toEqual('4');
+
+        button.click();
+        expect(button.textContent).toEqual('3');
+        expect(paragraph.textContent).toEqual('3');
+        unmount();
+
+        expect(container.firstChild).toBeFalsy();
+    });
+
     it('should pass context to a child', () => {
         const TextOutput: Component<Record<string, Observable<void>>> = (
             _props,
