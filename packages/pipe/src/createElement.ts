@@ -10,7 +10,8 @@ export type Component<Props extends Record<string, Observable<unknown> | unknown
 export type PipeNode<T extends HTMLElement = HTMLElement> = {
     element: T;
     cleanup$: Subject<void>;
-    contextValues$: Subject<[string, unknown]>;
+    contextValueSubject: Subject<[string, unknown]>;
+    contextValueReplay$: Observable<[string, unknown]>;
 };
 
 type HTMLElementProps<Tag extends keyof HTMLElementTagNameMap> = {
@@ -30,12 +31,12 @@ export function createElement<
     children?: PipeNode[] | Observable<[string, PipeNode | null]>,
 ): PipeNode {
     const cleanup$ = new Subject<void>();
-    const { context, contextValues$ } = initializeContext(cleanup$);
+    const { context, contextValueReplay$, contextValueSubject } = initializeContext(cleanup$);
 
     const element =
         typeof component === 'string'
             ? initializeDomElement(component, props, cleanup$)
-            : initializePipeElement(component, props, cleanup$, context, contextValues$);
+            : initializePipeElement(component, props, cleanup$, context, contextValueReplay$);
 
     cleanup$.subscribe({
         complete: () => {
@@ -43,17 +44,17 @@ export function createElement<
         },
     });
 
-    const node = { element, cleanup$, contextValues$ };
+    const node = { element, cleanup$, contextValueSubject, contextValueReplay$ };
 
     if (Array.isArray(children)) {
         for (const {
             element: child,
             cleanup$: childCleanup$,
-            contextValues$: childContextValues$,
+            contextValueSubject: childContextValueSubject,
         } of children) {
             element.appendChild(child);
             cleanup$.subscribe(childCleanup$);
-            contextValues$.subscribe(childContextValues$);
+            contextValueReplay$.subscribe(childContextValueSubject);
         }
     } else if (children) {
         mergeChildNodes(children, node);
@@ -71,7 +72,7 @@ const mergeChildNodes = (source: Observable<[string, PipeNode | null]>, parentNo
             const nextSibling = existingNode?.element.nextSibling;
             existingNode?.cleanup$.next();
             existingNode?.cleanup$.complete();
-            parentNode.contextValues$.subscribe(nextNode.contextValues$);
+            parentNode.contextValueReplay$.subscribe(nextNode.contextValueSubject);
 
             if (!nextNode) {
                 nodes.delete(key);
@@ -126,15 +127,14 @@ function initializePipeElement<Props extends Record<string, Observable<unknown> 
     props: Props,
     cleanup$: Observable<void>,
     context: Context,
-    contextValues$: Subject<[string, unknown]>,
+    contextValueReplay$: Observable<[string, unknown]>,
 ): HTMLElement {
     const {
         element,
         cleanup$: childCleanup$,
-        contextValues$: childContextValues$,
+        contextValueSubject: childContextValueSubject,
     } = component(props, cleanup$, context);
     cleanup$.subscribe(childCleanup$);
-    contextValues$.subscribe(childContextValues$);
-
+    contextValueReplay$.subscribe(childContextValueSubject);
     return element;
 }
