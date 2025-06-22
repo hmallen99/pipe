@@ -35,7 +35,7 @@ export function createElement<
     const element =
         typeof component === 'string'
             ? initializeDomElement(component, props, cleanup$)
-            : initializePipeElement(component, props, cleanup$, context);
+            : initializePipeElement(component, props, cleanup$, context, contextValues$);
 
     cleanup$.subscribe({
         complete: () => {
@@ -126,9 +126,15 @@ function initializePipeElement<Props extends Record<string, Observable<unknown> 
     props: Props,
     cleanup$: Observable<void>,
     context: Context,
+    contextValues$: Subject<[string, unknown]>,
 ): HTMLElement {
-    const { element, cleanup$: childCleanup$ } = component(props, cleanup$, context);
+    const {
+        element,
+        cleanup$: childCleanup$,
+        contextValues$: childContextValues$,
+    } = component(props, cleanup$, context);
     cleanup$.subscribe(childCleanup$);
+    contextValues$.subscribe(childContextValues$);
 
     return element;
 }
