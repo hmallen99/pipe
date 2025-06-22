@@ -1,13 +1,20 @@
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, filter, Observable, Subject, switchMap, takeUntil } from 'rxjs';
+
+export type Context = {
+    get: <T>(key: string) => Observable<T>;
+    set: <T>(key: string, value: T) => void;
+};
 
 export type Component<Props extends Record<string, Observable<unknown> | unknown>> = (
     props: Props,
     cleanup$: Observable<void>,
+    context: Context,
 ) => PipeNode;
 
 export type PipeNode<T extends HTMLElement = HTMLElement> = {
     element: T;
     cleanup$: Subject<void>;
+    contextValues$: Subject<[string, unknown]>;
 };
 
 type HTMLElementProps<Tag extends keyof HTMLElementTagNameMap> = {
@@ -26,24 +33,62 @@ export function createElement<
     props: Props,
     children?: PipeNode[] | Observable<[string, PipeNode | null]>,
 ): PipeNode {
+    const contextValues$ = new Subject<[string, unknown]>();
+
+    const mappedObservables = new Map<string, Subject<unknown>>();
+
     const cleanup$ = new Subject<void>();
+    const contextListener$ = new BehaviorSubject(mappedObservables);
+
+    contextValues$.subscribe(([nextKey, nextValue]) => {
+        if (!mappedObservables.has(nextKey)) {
+            mappedObservables.set(nextKey, new BehaviorSubject(nextValue));
+        } else {
+            mappedObservables.get(nextKey)!.next(nextValue);
+        }
+        contextListener$.next(mappedObservables);
+    });
+
+    const context: Context = {
+        get: <T>(key: string) => {
+            return contextListener$.pipe(
+                filter((mappedObservables) => mappedObservables.has(key)),
+                switchMap((mappedObservables) => {
+                    return mappedObservables.get(key) as Observable<T>;
+                }),
+            );
+        },
+        set: <T>(key: string, value: T) => {
+            contextValues$.next([key, value]);
+        },
+    };
+
     const element =
         typeof component === 'string'
             ? initializeDomElement(component, props, cleanup$)
-            : initializePipeElement(component, props, cleanup$);
+            : initializePipeElement(component, props, cleanup$, context);
 
     cleanup$.subscribe({
         complete: () => {
             element.remove();
+            contextValues$.complete();
+            for (const observable of mappedObservables.values()) {
+                observable.complete();
+            }
         },
     });
 
-    const node = { element, cleanup$ };
+    const node = { element, cleanup$, contextValues$ };
 
     if (Array.isArray(children)) {
-        for (const { element: child, cleanup$: childCleanup$ } of children) {
+        for (const {
+            element: child,
+            cleanup$: childCleanup$,
+            contextValues$: childContextValues$,
+        } of children) {
             element.appendChild(child);
             cleanup$.subscribe(childCleanup$);
+            contextValues$.subscribe(childContextValues$);
         }
     } else if (children) {
         mergeChildNodes(children, node);
@@ -61,6 +106,7 @@ const mergeChildNodes = (source: Observable<[string, PipeNode | null]>, parentNo
             const nextSibling = existingNode?.element.nextSibling;
             existingNode?.cleanup$.next();
             existingNode?.cleanup$.complete();
+            parentNode.contextValues$.subscribe(nextNode.contextValues$);
 
             if (!nextNode) {
                 nodes.delete(key);
@@ -114,8 +160,9 @@ function initializePipeElement<Props extends Record<string, Observable<unknown> 
     component: Component<Props>,
     props: Props,
     cleanup$: Observable<void>,
+    context: Context,
 ): HTMLElement {
-    const { element, cleanup$: childCleanup$ } = component(props, cleanup$);
+    const { element, cleanup$: childCleanup$ } = component(props, cleanup$, context);
     cleanup$.subscribe(childCleanup$);
 
     return element;
