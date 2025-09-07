@@ -5,25 +5,26 @@ export type NavigationContext = {
     navigateTo: (newPage: string) => void;
 };
 export const NavigationContextKey = 'navigationContext';
+const PAGE_KEY = 'default';
 
 export const Router: Component<{ routes: Routes; id: string; defaultRoute?: string }> = (
     { routes, id, defaultRoute = '/' },
     cleanup$,
     context,
 ) => {
-    const initialPage = window.history.state.page ?? defaultRoute;
-    if (!window.history.state.page) {
+    const initialPage = window.history.state?.page ?? defaultRoute;
+    if (window.history.state === null || !window.history.state.page) {
         window.history.replaceState({ page: initialPage }, '', initialPage);
     }
 
     const selectedRoute$ = new BehaviorSubject<[string, PipeNode]>([
-        initialPage,
+        PAGE_KEY,
         createElement(routes[initialPage], {}),
     ]);
 
     const navigateTo = (newPage: string) => {
-        selectedRoute$.next([newPage, createElement(routes[newPage], {})]);
-        history.pushState({ page: newPage }, '', `/${newPage}`);
+        selectedRoute$.next([PAGE_KEY, createElement(routes[newPage], {})]);
+        history.pushState({ page: newPage }, '', `${newPage}`);
     };
 
     const popStateListener = (event: PopStateEvent) => {
