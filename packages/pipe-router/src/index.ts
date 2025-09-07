@@ -1,1 +1,2 @@
-export const Router = {};
+export * from './Router';
+export * from './Link';

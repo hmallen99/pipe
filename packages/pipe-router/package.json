@@ -21,6 +21,7 @@
         "@hmallen99/pipe": "^1.1.0"
     },
     "devDependencies": {
+        "@hmallen99/pipe": "^1.1.0",
         "@typescript-eslint/eslint-plugin": "^7.8.0",
         "@typescript-eslint/parser": "^7.8.0",
         "@swc/cli": "^0.3.12",
