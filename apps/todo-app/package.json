@@ -19,6 +19,7 @@
     "typescript-eslint": "^8.5.0"
   },
   "dependencies": {
-    "@hmallen99/pipe": "^1.1.0"
+    "@hmallen99/pipe": "^1.1.0",
+    "@hmallen99/pipe-router": "^1.1.0"
   }
 }

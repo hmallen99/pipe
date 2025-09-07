@@ -11,10 +11,7 @@ import {
   takeUntil,
 } from '@hmallen99/pipe';
 
-export const TodoApp: Component<Record<string, Observable<void>>> = (
-  _,
-  cleanup$,
-) => {
+export const TodoApp: Component<Record<string, unknown>> = (_, cleanup$) => {
   const clickAdd$ = new Subject<string>();
   const clickRemove$ = new Subject<string>();
 
